@@ -174,9 +174,9 @@ module ActiveAdmin
 
       def build(page_presenter, collection)
         table_options = {
-          id: "index_table_#{active_admin_config.resource_name.plural}",
+          id: "#{active_admin_config.resource_name.plural}-index-table",
           sortable: true,
-          class: "index_table index",
+          class: "table table-striped table-hover table-condensed",
           i18n: active_admin_config.resource_class,
           paginator: page_presenter[:paginator] != false,
           row_class: page_presenter[:row_class]

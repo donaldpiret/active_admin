@@ -14,7 +14,7 @@ module ActiveAdmin
 
 
       def default_class_name
-        "scopes table_tools_segmented_control"
+        "scopes list-inline"
       end
 
       def tag_name

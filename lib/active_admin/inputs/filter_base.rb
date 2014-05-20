@@ -23,7 +23,11 @@ module ActiveAdmin
       end
 
       def wrapper_html_options
-        { class: "filter_form_field #{as}" }
+        { class: 'form-group' }
+      end
+
+      def input_html_options
+        super.merge(class: 'form-control')
       end
 
       # Override the standard finder to accept a proc

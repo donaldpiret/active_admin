@@ -57,10 +57,10 @@ module ActiveAdmin
       # Helper method to render a filter form
       def active_admin_filters_form_for(search, filters, options = {})
         defaults = { builder: ActiveAdmin::Filters::FormBuilder,
-                     url: collection_path,
-                     html: {class: 'filter_form'} }
+          url: collection_path,
+          html: { class: 'filters-form' } }
         required = { html: {method: :get},
-                     as: :q }
+          as: :q }
         options  = defaults.deep_merge(options).deep_merge(required)
 
         form_for search, options do |f|
@@ -68,7 +68,7 @@ module ActiveAdmin
             next if opts.key?(:if)     && !call_method_or_proc_on(self, opts[:if])
             next if opts.key?(:unless) &&  call_method_or_proc_on(self, opts[:unless])
 
-            f.filter attribute, opts.except(:if, :unless)
+            f.filter attribute, opts.except(:if, :unless).merge(class: 'form-control')
           end
 
           buttons = content_tag :div, class: "buttons" do
