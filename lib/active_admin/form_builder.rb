@@ -6,7 +6,7 @@
 # an intuitive way to build has_many associated records in the same form.
 #
 module ActiveAdmin
-  class FormBuilder < ::Formtastic::FormBuilder
+  class FormBuilder < ::FormtasticBootstrap::FormBuilder
 
     attr_reader :form_buffers
 
