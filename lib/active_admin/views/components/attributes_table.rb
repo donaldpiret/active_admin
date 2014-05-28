@@ -10,9 +10,7 @@ module ActiveAdmin
         options = { }
         options[:for] = @collection.first if single_record?
         super(options)
-        classes = 'table'
-        classes << options[:class] if options[:class]
-        @table = table class: classes
+        @table = table class: (options[:class].present? ? options[:class] : 'table table-condensed')
         build_colgroups
         rows(*attrs)
       end
