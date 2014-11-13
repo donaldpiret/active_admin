@@ -5,6 +5,18 @@
 # individual form methods (hence the +form_buffers+ object). Second, this provides
 # an intuitive way to build has_many associated records in the same form.
 #
+module Formtastic
+  module Inputs
+    module Base
+      def input_wrapping(&block)
+        html = super
+        template.concat(html) if template.output_buffer && template.assigns['has_many_block']
+        html
+      end
+    end
+  end
+end
+
 module ActiveAdmin
   class FormBuilder < ::FormtasticBootstrap::FormBuilder
 
@@ -19,23 +31,6 @@ module ActiveAdmin
       @use_form_buffer = block_given?
       form_buffers.last << with_new_form_buffer{ super }
     end
-  end
-end
-
-module Formtastic
-  module Inputs
-    module Base
-      def input_wrapping(&block)
-        html = super
-        template.concat(html) if template.output_buffer && template.assigns['has_many_block']
-        html
-      end
-    end
-  end
-end
-
-module ActiveAdmin
-  class FormBuilder < ::Formtastic::FormBuilder
 
     def cancel_link(url = {action: "index"}, html_options = {}, li_attrs = {})
       li_attrs[:class] ||= "cancel"
