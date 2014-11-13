@@ -74,9 +74,9 @@ module ActiveAdmin
         end
 
         def build_flash_messages
-          if active_admin_flash_messages.any?
+          if flash_messages.any?
             div class: 'flashes' do
-              active_admin_flash_messages.each do |type, message|
+              flash_messages.each do |type, message|
                 div class: "alert #{bootstrap_class_for(type)} alert-dismissable fade in" do
                   button type: 'button', class: 'close', 'data-dismiss' => 'alert', 'aria-hidden' => 'true' do
                     text_node '&times;'.html_safe
