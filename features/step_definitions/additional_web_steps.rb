@@ -43,7 +43,7 @@ Then /^an "([^"]*)" exception should be raised when I follow "([^"]*)"$/ do |err
 end
 
 Then /^I should be in the resource section for (.+)$/ do |resource_name|
-  expect(current_url).to include resource_name.gsub(' ', '').underscore.pluralize
+  expect(current_url).to include resource_name.tr(' ', '').underscore.pluralize
 end
 
 Then /^I should wait and see "([^"]*)"(?: within "([^"]*)")?$/ do |text, selector|
@@ -77,5 +77,5 @@ Then /^I should see a validation error "([^"]*)"$/ do |error_message|
 end
 
 Then /^I should see a table with id "([^"]*)"$/ do |dom_id|
-  expect(page).to have_css 'table', id: dom_id
+  page.find("table##{dom_id}")
 end

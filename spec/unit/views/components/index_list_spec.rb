@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ActiveAdmin::Views::IndexList do
 
@@ -9,7 +9,7 @@ describe ActiveAdmin::Views::IndexList do
 
     let(:helpers) do
       helpers = mock_action_view
-      helpers.stub url_for: "/"
+      allow(helpers).to receive(:url_for).and_return("/")
       allow(helpers).to receive(:params).and_return as: "table"
       helpers
     end
@@ -22,7 +22,7 @@ describe ActiveAdmin::Views::IndexList do
 
     describe '#tag_name' do
       subject { super().tag_name }
-      it { should eq 'ul'}
+      it { is_expected.to eq 'ul'}
     end
 
     it "should contain the names of available indexes in links" do

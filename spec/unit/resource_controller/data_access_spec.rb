@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ActiveAdmin::ResourceController::DataAccess do
   let(:params) do
@@ -70,4 +70,22 @@ describe ActiveAdmin::ResourceController::DataAccess do
     end
   end
 
+  describe "includes" do
+    context "with no includes" do
+      it "should return the chain" do
+        chain = double "ChainObj"
+        expect(controller.send(:apply_includes, chain)).to eq chain
+      end
+    end
+
+    context "with includes" do
+      it "should return the chain with the includes" do
+        chain = double "ChainObj"
+        chain_with_includes = double "ChainObjWithIncludes"
+        expect(chain).to receive(:includes).with(:taggings, :author).and_return(chain_with_includes)
+        expect(controller.send(:active_admin_config)).to receive(:includes).twice.and_return([:taggings, :author])
+        expect(controller.send(:apply_includes, chain)).to eq chain_with_includes
+      end
+    end
+  end
 end

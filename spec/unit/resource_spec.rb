@@ -1,11 +1,10 @@
-require 'spec_helper'
+require 'rails_helper'
 require File.expand_path('config_shared_examples', File.dirname(__FILE__))
 
 module ActiveAdmin
   describe Resource do
 
-    it_should_behave_like "ActiveAdmin::Config"
-
+    it_should_behave_like "ActiveAdmin::Resource"
     before { load_defaults! }
 
     let(:application){ ActiveAdmin::Application.new }
@@ -69,12 +68,12 @@ module ActiveAdmin
 
       context "when regular resource" do
         let(:resource){ namespace.register(Post) }
-        it { should be_include_in_menu }
+        it { is_expected.to be_include_in_menu }
       end
 
       context "when menu set to false" do
         let(:resource){ namespace.register(Post){ menu false } }
-        it { should_not be_include_in_menu }
+        it { is_expected.not_to be_include_in_menu }
       end
     end
 
@@ -196,7 +195,7 @@ module ActiveAdmin
     describe "#csv_builder" do
       context "when no csv builder set" do
         it "should return a default column builder with id and content columns" do
-          expect(config.csv_builder.render_columns.size).to eq Category.content_columns.size + 1
+          expect(config.csv_builder.exec_columns.size).to eq Category.content_columns.size + 1
         end
       end
 
@@ -213,18 +212,18 @@ module ActiveAdmin
       subject { config.breadcrumb }
 
       context "when no breadcrumb is set" do
-        it { should == namespace.breadcrumb }
+        it { is_expected.to eq(namespace.breadcrumb) }
       end
 
       context "when breadcrumb is set" do
         context "when set to true" do
           before { config.breadcrumb = true }
-          it { should be_true }
+          it { is_expected.to be_truthy }
         end
 
         context "when set to false" do
           before { config.breadcrumb = false }
-          it { should be_false }
+          it { is_expected.to be_falsey }
         end
       end
     end

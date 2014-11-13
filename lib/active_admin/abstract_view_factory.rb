@@ -46,8 +46,7 @@ module ActiveAdmin
       set_view_for_key(key, value)
     end
 
-    # Override respond to to include keys
-    def respond_to?(method)
+    def respond_to_missing?(method, include_private)
       key = key_from_method_name(method)
       if has_key?(key)
         true
@@ -72,7 +71,7 @@ module ActiveAdmin
     end
 
     def key_from_method_name(method)
-      method.to_s.gsub('=', '').to_sym
+      method.to_s.tr('=', '').to_sym
     end
 
     def get_view_for_key(key)

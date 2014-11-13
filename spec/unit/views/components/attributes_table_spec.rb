@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ActiveAdmin::Views::AttributesTable do
 
@@ -79,16 +79,15 @@ describe ActiveAdmin::Views::AttributesTable do
             ["Id" , "1"],
             ["Title" , "Hello World"],
             ["Body" , "<span class=\"empty\">Empty</span>"]
-          ].each_with_index do |set, i|
-            describe "for #{set[0]}" do
-              let(:title){ set[0] }
-              let(:content){ set[1] }
+          ].each_with_index do |(title, content), i|
+            describe "for #{title}" do
               let(:current_row){ table.find_by_tag("tr")[i] }
 
-              it "should have the title '#{set[0]}'" do
+              it "should have the title '#{title}'" do
                 expect(current_row.find_by_tag("th").first.content).to eq title
               end
-              it "should have the content '#{set[1]}'" do
+
+              it "should have the content '#{content}'" do
                 expect(current_row.find_by_tag("td").first.content.chomp.strip).to eq content
               end
             end
@@ -157,7 +156,8 @@ describe ActiveAdmin::Views::AttributesTable do
     context "with a collection" do
       let(:posts) do
         [Post.new(title: "Hello World", id: 1), Post.new(title: "Multi Column", id: 2)].each_with_index do |post, index|
-          post.stub(id: index + 1, :new_record? => false)
+          allow(post).to receive(:id).and_return(index + 1)
+          allow(post).to receive(:new_record?).and_return(false)
         end
       end
 

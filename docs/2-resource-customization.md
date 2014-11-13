@@ -27,7 +27,17 @@ ActiveAdmin.register Post do
 end
 ```
 
-For nested associations in your form, this is how you define their attributes:
+Any form field that sends multiple values (such as a HABTM association, or an array attribute)
+needs to pass an empty array to `permit_params`:
+
+```ruby
+ActiveAdmin.register Post do
+  permit_params :title, :content, :publisher_id, roles: []
+end
+```
+
+Nested associations in the same form also require an array, but it
+needs to be filled with any attributes used.
 
 ```ruby
 ActiveAdmin.register Post do
@@ -60,7 +70,7 @@ ActiveAdmin.register Post do
   controller do
     def create
       # Good
-      @post = Post.new(permitted_params)
+      @post = Post.new(permitted_params[:post])
       # Bad
       @post = Post.new(params[:post])
 
@@ -210,7 +220,7 @@ name? Well, you have to refer to it by its `:id`.
 
 ```ruby
 # config/initializers/active_admin.rb
-config.namespace :admin do |admin
+config.namespace :admin do |admin|
   admin.build_menu do |menu|
     menu.add id: 'blog', label: proc{"Something dynamic"}, priority: 0
   end
@@ -273,15 +283,25 @@ ActiveAdmin.register Post do
 end
 ```
 
-## Customizing resource retrieval
+## Eager loading
 
 A common way to increase page performance is to elimate N+1 queries by eager loading associations:
 
 ```ruby
 ActiveAdmin.register Post do
+  includes :author, :categories
+end
+```
+
+## Customizing resource retrieval
+
+If you need to customize the collection properties, you can overwrite the `scoped_collection` method.
+
+```ruby
+ActiveAdmin.register Post do
   controller do
     def scoped_collection
-      super.includes :author, :categories
+      end_of_association_chain.where(visibility: true)
     end
   end
 end
@@ -370,9 +390,18 @@ different menus, say perhaps based on user permissions. For example:
 
 ```ruby
 ActiveAdmin.register Ticket do
-  belongs_to: :project
+  belongs_to :project
   navigation_menu do
     authorized?(:manage, SomeResource) ? :project : :restricted_menu
   end
+end
+```
+
+If you still want your `belongs_to` resources to be available in the default menu
+and through non-nested routes, you can use the `:optional` option. For example:
+
+```ruby
+ActiveAdmin.register Ticket do
+  belongs_to :project, optional: true
 end
 ```

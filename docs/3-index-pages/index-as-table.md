@@ -72,7 +72,7 @@ index do
   selectable_column
   column :title
   actions do |post|
-    link_to "Preview", admin_preview_post_path(post), class: "member_link"
+    item "Preview", admin_preview_post_path(post), class: "member_link"
   end
 end
 ```
@@ -83,7 +83,18 @@ Or forego the default links entirely:
 index do
   column :title
   actions defaults: false do |post|
-    link_to "View", admin_post_path(post)
+    item "View", admin_post_path(post)
+  end
+end
+```
+
+Or append custom action with custom html via arbre:
+
+```ruby
+index do
+  column :title
+  actions do |post|
+    a link_to "View", admin_post_path(post)
   end
 end
 ```
@@ -99,7 +110,6 @@ index do
   end
 end
 ```
-
 
 ## Sorting
 
@@ -172,5 +182,16 @@ For example, if you were using CanCan:
 index do
   column :title, sortable: false
   column :secret_data if can? :manage, Post
+end
+```
+
+## Custom row class
+
+In order to add special class to table rows pass the proc object as a `:row_class` option
+of the `index` method.
+
+```ruby
+index row_class: ->elem { 'active' if elem.active? } do
+  # columns
 end
 ```

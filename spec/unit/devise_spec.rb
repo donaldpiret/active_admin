@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe ActiveAdmin::Devise::Controller do
 
@@ -22,7 +22,7 @@ describe ActiveAdmin::Devise::Controller do
     end
 
     it "should set the root path to '/' when no default namespace" do
-      ActiveAdmin.application.stub default_namespace: false
+      allow(ActiveAdmin.application).to receive(:default_namespace).and_return(false)
       expect(controller.root_path).to eq "/foo/"
     end
 
@@ -37,7 +37,7 @@ describe ActiveAdmin::Devise::Controller do
     end
 
     it "should set the root path to '/' when no default namespace" do
-      ActiveAdmin.application.stub default_namespace: false
+      allow(ActiveAdmin.application).to receive(:default_namespace).and_return(false)
       expect(controller.root_path).to eq "/"
     end
 

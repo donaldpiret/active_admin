@@ -82,6 +82,17 @@ module ActiveAdmin
     # A proc to be used when a user is not authorized to view the current resource
     inheritable_setting :on_unauthorized_access, :rescue_active_admin_access_denied
 
+    # A regex to detect unsupported browser, set to false to disable
+    inheritable_setting :unsupported_browser_matcher, /MSIE [1-8]\.0/
+
+    # Request parameters that are permitted by default
+    inheritable_setting :permitted_params, [
+      :utf8, :_method, :authenticity_token, :commit, :id
+    ]
+
+    # Set flash message keys that shouldn't show in ActiveAdmin
+    inheritable_setting :flash_keys_to_except, ['timedout']
+
     # Active Admin makes educated guesses when displaying objects, this is
     # the list of methods it tries calling in order
     setting :display_name_methods, [ :display_name,
@@ -124,15 +135,14 @@ module ActiveAdmin
     #
     # Yields the namespace if a block is given
     #
-    # @returns [Namespace] the new or existing namespace
+    # @return [Namespace] the new or existing namespace
     def namespace(name)
       name ||= :root
 
-      if namespaces[name]
-        namespace = namespaces[name]
-      else
-        namespace = namespaces[name] = Namespace.new(self, name)
+      namespace = namespaces[name] ||= begin
+        namespace = Namespace.new(self, name)
         ActiveAdmin::Event.dispatch ActiveAdmin::Namespace::RegisterEvent, namespace
+        namespace
       end
 
       yield(namespace) if block_given?
@@ -143,7 +153,7 @@ module ActiveAdmin
     # Register a page
     #
     # @param name [String] The page name
-    # @options [Hash] Accepts option :namespace.
+    # @option [Hash] Accepts option :namespace.
     # @&block The registration block.
     #
     def register_page(name, options = {}, &block)

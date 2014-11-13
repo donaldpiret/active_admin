@@ -27,6 +27,17 @@ inject_into_file 'app/models/post.rb', %q{
 }, after: 'class Post < ActiveRecord::Base'
 copy_file File.expand_path('../templates/post_decorator.rb', __FILE__), "app/models/post_decorator.rb"
 
+generate :model, "blog/post title:string body:text published_at:datetime author_id:integer position:integer custom_category_id:integer starred:boolean foo_id:integer"
+inject_into_file 'app/models/blog/post.rb', %q{
+  belongs_to :category, foreign_key: :custom_category_id
+  belongs_to :author, class_name: 'User'
+  has_many :taggings
+  accepts_nested_attributes_for :author
+  accepts_nested_attributes_for :taggings
+  attr_accessible :author, :position unless Rails::VERSION::MAJOR > 3 && !defined? ProtectedAttributes
+}, after: 'class Blog::Post < ActiveRecord::Base'
+
+
 generate :model, "user type:string first_name:string last_name:string username:string age:integer"
 inject_into_file 'app/models/user.rb', %q{
   has_many :posts, foreign_key: 'author_id'
@@ -70,6 +81,9 @@ inject_into_file "config/environments/test.rb", "  config.action_mailer.default_
 inject_into_file "config/environment.rb", "\n$LOAD_PATH.unshift('#{File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'lib'))}')\nrequire \"active_admin\"\n", after: "require File.expand_path('../application', __FILE__)"
 inject_into_file "config/application.rb", "\nrequire 'devise'\n", after: "require 'rails/all'"
 
+# Force strong parameters to raise exceptions
+inject_into_file 'config/application.rb', "\n\n    config.action_controller.action_on_unpermitted_parameters = :raise if Rails::VERSION::MAJOR == 4\n\n", after: 'class Application < Rails::Application'
+
 # Add some translations
 append_file "config/locales/en.yml", File.read(File.expand_path('../templates/en.yml', __FILE__))
 
@@ -81,29 +95,27 @@ directory File.expand_path('../templates/policies', __FILE__), 'app/policies'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-generate :'active_admin:install'
+generate 'active_admin:install'
+
+inject_into_file "config/routes.rb", "\n  root to: redirect('/admin')", after: /.*::Application.routes.draw do/
+remove_file "public/index.html" if File.exists? "public/index.html"
 
 # Devise master doesn't set up its secret key on Rails 4.1
 # https://github.com/plataformatec/devise/issues/2554
 gsub_file 'config/initializers/devise.rb', /# config.secret_key =/, 'config.secret_key ='
 
-rake "db:migrate"
-rake "db:test:prepare"
+rake "db:migrate db:test:prepare"
 run "/usr/bin/env RAILS_ENV=cucumber rake db:migrate"
 
-# Setup parallel_tests
-def setup_parallel_tests_database(after, force_insert_same_content = false)
-  inject_into_file 'config/database.yml', "<%= ENV['TEST_ENV_NUMBER'] %>", after: after, force: force_insert_same_content
-end
+if ENV['INSTALL_PARALLEL']
+  inject_into_file 'config/database.yml', "<%= ENV['TEST_ENV_NUMBER'] %>", after: 'test.sqlite3'
+  inject_into_file 'config/database.yml', "<%= ENV['TEST_ENV_NUMBER'] %>", after: 'cucumber.sqlite3', force: true
 
-setup_parallel_tests_database "test.sqlite3"
-setup_parallel_tests_database "cucumber.sqlite3", true
-
-# Note: this is hack!
-# Somehow, calling parallel_tests tasks from Rails generator using Thor does not work ...
-# RAILS_ENV variable never makes it to parallel_tests tasks.
-# We need to call these tasks in the after set up hook in order to creates cucumber DBs + run migrations on test & cucumber DBs
-create_file 'lib/tasks/parallel.rake', %q{
+  # Note: this is hack!
+  # Somehow, calling parallel_tests tasks from Rails generator using Thor does not work ...
+  # RAILS_ENV variable never makes it to parallel_tests tasks.
+  # We need to call these tasks in the after set up hook in order to creates cucumber DBs + run migrations on test & cucumber DBs
+  create_file 'lib/tasks/parallel.rake', %q{
 namespace :parallel do
   def run_in_parallel(cmd, options)
     count = "-n #{options[:count]}" if options[:count]
@@ -123,4 +135,4 @@ namespace :parallel do
   end
 end
 }
-
+end
